@@ -1,29 +1,48 @@
+# ===================================================================================
+# PIPELINE CI GITHUB ACTIONS: tự chạy test Playwright trên máy ảo của GitHub mỗi khi push / tạo pull request.
+# Tương đương RF: job Jenkins/CI gọi lệnh `robot ...` rồi lưu log.html/report.html.
+# Test chạy với playwright.service.config.js -> trình duyệt chạy trên cloud Azure Playwright Workspaces.
+# ===================================================================================
+# name: tên workflow hiển thị ở tab Actions trên GitHub.
 name: Playwright Tests
+# on: khi nào pipeline chạy (trigger): push hoặc pull request vào nhánh main/master.
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+# jobs: danh sách công việc; mỗi job chạy trên một máy ảo riêng. 'test' là tên job.
 jobs:
   test:
+    # timeout-minutes: huỷ job nếu chạy quá 60 phút. runs-on: loại máy ảo (Ubuntu bản mới nhất).
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    # steps: các bước chạy tuần tự. 'uses' = dùng action có sẵn; 'run' = chạy lệnh shell; 'with' = tham số cho action.
     steps:
+    # Lấy source code của repo về máy ảo.
     - uses: actions/checkout@v5
+    # Cài Node.js bản LTS (≈ cài Python trước khi chạy RF).
     - uses: actions/setup-node@v5
       with:
         node-version: lts/*
+    # npm ci ≈ pip install -r requirements.txt: cài đúng version thư viện ghi trong package-lock.json.
     - name: Install dependencies
       run: npm ci
 
+    # Đăng nhập Azure. ${{ secrets.AZURE_CREDENTIALS }} = giá trị bí mật cấu hình ở Settings > Secrets của repo
+    # (bị che trong log). Cần cho DefaultAzureCredential trong playwright.service.config.js.
     - name: Azure Login
       uses: azure/login@v2
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
+    # Chạy test với config Azure; --workers=4 ≈ pabot --processes 4.
+    # env: biến môi trường cho lệnh; ${{ vars.X }} = biến thường (không bí mật) cấu hình ở Settings > Variables.
     - name: Run Playwright tests
       env:
         PLAYWRIGHT_SERVICE_URL: ${{ vars.PLAYWRIGHT_SERVICE_URL }}
       run: npx playwright test --config=playwright.service.config.js --workers=4
+    # Upload thư mục playwright-report/ thành 'artifact' (file tải về được từ trang kết quả run) ≈ lưu log/report của RF.
+    # if: !cancelled() = vẫn upload kể cả khi test fail (chỉ bỏ qua khi run bị huỷ). retention-days: giữ 30 ngày.
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
