@@ -27,6 +27,8 @@
  //   - ( ... ) => { ... } là arrow function (hàm viết gọn), ≈ phần thân của Test Case.
  //   - {browser} là 'fixture': Playwright tự tạo sẵn và đưa vào (≈ Suite Setup mở browser).
  //     Ở đây nhận 'browser' để tự tạo context/page thay vì dùng 'page' có sẵn.
+//Playwright Test dùng mã nguồn JS/TS thuần túy, loại bỏ các tầng trung gian để giao tiếp trực tiếp với trình duyệt và có cơ chế auto-wait tự động thông minh;
+//trong khi Robot Framework sử dụng mô hình từ khóa (keyword-driven) qua các thư viện trung gian (như SeleniumLibrary) và thường đòi hỏi phải cấu hình lệnh chờ thủ công hơn
  test('@Web Browser Context-Validating Error login', async ({browser})=>
  {
    
@@ -81,7 +83,7 @@
  });
  
 
- // Test Case 2: dùng fixture {page} - Playwright tự tạo sẵn tab mới cho test này.
+ // Test Case 2: dùng fixture {page} - Playwright tự tạo sẵn tab mới cho test này. dropdown,radio button)
  test('@Web UI Controls', async ({page})=>
  {
     await page.goto("https://rahulshettyacademy.com/loginpagePractise/");

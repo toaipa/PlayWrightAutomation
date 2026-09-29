@@ -53,3 +53,6 @@ const config = {
 
 // module.exports = 'xuất' object ra ngoài để Playwright (hoặc file khác dùng require) đọc được.
 module.exports = config;
+
+//Chạy: https://playwright.dev/docs/test-cli
+npx playwright test tests/UIBasicstest.spec.js -g "Web Browser Context-Validating Error login"
