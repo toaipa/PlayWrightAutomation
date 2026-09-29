@@ -6,3 +6,5 @@ test-results/
 *.png
 state.json
 temp_explore.js
+.DS_Store
+.idea/
